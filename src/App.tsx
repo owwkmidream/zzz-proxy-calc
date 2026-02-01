@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Hexagon, Users, Calculator, Sword, Trophy, Ghost, RotateCcw } from 'lucide-react';
+import { Search, X, Calculator, Sword, Trophy, Ghost } from 'lucide-react';
 
 // --- 类型定义 ---
 interface Task {
@@ -22,15 +22,11 @@ interface RawDataItem {
 const LIMITS = { CONTRIB: 1000, CREDIT: 5000 };
 
 // 调整后的基准参数
-const TASKS: Record<string, Task> = {
-  HOLLOW: { id: 'hollow', name: "普通空洞", contrib: 80, credit: 600, time: 150 }, // 2.5 min
-  HUNT: { id: 'hunt', name: "恶名狩猎", contrib: 100, credit: 500, time: 60 },     // 1 min
-  EXPERT: { id: 'expert', name: "专业挑战", contrib: 70, credit: 250, time: 60 }   // 1 min
+const TASKS: Record<string, Task & { limit?: number }> = {
+  HOLLOW: { id: 'hollow', name: "普通空洞", contrib: 80, credit: 600, time: 150 },
+  HUNT: { id: 'hunt', name: "恶名狩猎", contrib: 100, credit: 500, time: 60 },
+  EXPERT: { id: 'expert', name: "专业挑战", contrib: 70, credit: 250, time: 60 }
 };
-
-// 样式常量 (替换原本的 style 标签内容)
-const SHORTCUT_BTN_CLASS = "flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded transition-all border";
-const STAT_PILL_CLASS = "bg-black/30 rounded px-2 py-1 text-xs font-mono text-zinc-300 flex items-center gap-1.5 border border-white/5 justify-center";
 
 // --- 数据源 (保持不变) ---
 const rawData = [
@@ -136,74 +132,52 @@ const getHeatmapColor = (seconds: number) => {
   return `hsl(${hue}, 100%, 60%)`;
 };
 
-// 确定性的策略模拟器
-const simulateStrategies = (reqC: number, reqCr: number, strategy: string) => {
+// --- 算法逻辑 ---
+
+// 核心解算器 (贪心: 狩猎 > 挑战 > 空洞)
+const solveOptimalPlan = (reqC: number, reqCr: number, limitHunt: number, limitExpert: number) => {
   let c = 0;
   let cr = 0;
   let counts: Record<string, number> = { hollow: 0, hunt: 0, expert: 0 };
+  let totalTime = 0;
 
-  // 策略优先级队列
-  let order: string[] = [];
-  if (strategy === 'speed') order = ['hunt', 'expert', 'hollow', 'hunt', 'expert']; // 4:1 ratio approx
-  if (strategy === 'balanced') order = ['hollow', 'hunt', 'expert']; // 1:1:1
-  if (strategy === 'hollow') order = ['hollow', 'hollow', 'hollow', 'hunt']; // 3:1 ratio approx
+  const priority = [
+    { ...TASKS.HUNT, limit: limitHunt },
+    { ...TASKS.EXPERT, limit: limitExpert },
+    { ...TASKS.HOLLOW, limit: Infinity }
+  ];
 
-  let i = 0;
+  // 循环直到两个目标都达成
   while (c < reqC || cr < reqCr) {
-    const typeKey = order[i % order.length];
-    const task = TASKS[typeKey.toUpperCase()];
+    let bestTask = null;
 
-    counts[typeKey]++;
-    c += task.contrib;
-    cr += task.credit;
-    i++;
+    for (const task of priority) {
+      if (counts[task.id] >= (task.limit ?? Infinity)) continue;
+      bestTask = task;
+      break;
+    }
+
+    if (!bestTask) break; // Should not happen given infinite Hollows
+
+    counts[bestTask.id]++;
+    c += bestTask.contrib;
+    cr += bestTask.credit;
+    totalTime += bestTask.time;
   }
 
-  const totalTime =
-    counts.hollow * TASKS.HOLLOW.time +
-    counts.hunt * TASKS.HUNT.time +
-    counts.expert * TASKS.EXPERT.time;
-
-  return { counts, totalTime };
+  return { counts, totalTime, finalContrib: c, finalCredit: cr };
 }
 
-// 生成三种方案
-const generatePlans = (currContrib: number, currCredit: number) => {
-  const neededContrib = Math.max(0, LIMITS.CONTRIB - currContrib);
-  const neededCredit = Math.max(0, LIMITS.CREDIT - currCredit);
+// 生成引用基准 (从零开始)
+const generateBenchmarks = () => {
+  // 场景 1: 最好情况 (假设能打 5 次狩猎，剩下全空洞)
+  const best = solveOptimalPlan(LIMITS.CONTRIB, LIMITS.CREDIT, 5, 0);
+  // 场景 2: 适中情况 (假设能打 5 次挑战，剩下全空洞)
+  const mod = solveOptimalPlan(LIMITS.CONTRIB, LIMITS.CREDIT, 0, 5);
+  // 场景 3: 最差情况 (全空洞)
+  const worst = solveOptimalPlan(LIMITS.CONTRIB, LIMITS.CREDIT, 0, 0);
 
-  if (neededContrib === 0 && neededCredit === 0) return null;
-
-  const planSpeed = simulateStrategies(neededContrib, neededCredit, 'speed');
-  const planBalanced = simulateStrategies(neededContrib, neededCredit, 'balanced');
-  const planHollow = simulateStrategies(neededContrib, neededCredit, 'hollow');
-
-  return [
-    {
-      id: 'speed',
-      title: '⚡ 极速党',
-      desc: '效率至上 (主刷1分钟副本)',
-      data: planSpeed,
-      color: 'text-yellow-400',
-      border: 'border-yellow-500/30'
-    },
-    {
-      id: 'balanced',
-      title: '⚖️ 均衡党',
-      desc: '劳逸结合 (混合搭配)',
-      data: planBalanced,
-      color: 'text-cyan-400',
-      border: 'border-cyan-500/30'
-    },
-    {
-      id: 'hollow',
-      title: '🕳️ 空洞党',
-      desc: '深耕空洞 (主刷2.5分钟副本)',
-      data: planHollow,
-      color: 'text-purple-400',
-      border: 'border-purple-500/30'
-    }
-  ];
+  return { best, mod, worst };
 };
 
 const App = () => {
@@ -215,6 +189,25 @@ const App = () => {
   // 计算器状态
   const [currContrib, setCurrContrib] = useState<string | number>('');
   const [currCredit, setCurrCredit] = useState<string | number>('');
+  const [maxHunt, setMaxHunt] = useState<number>(3);
+  const [maxExpert, setMaxExpert] = useState<number>(5);
+
+  const benchmarks = generateBenchmarks();
+
+  // 动态计算用户方案
+  const getDynamicPlan = () => {
+    const c = Number(currContrib) || 0;
+    const cr = Number(currCredit) || 0;
+    const reqC = Math.max(0, LIMITS.CONTRIB - c);
+    const reqCr = Math.max(0, LIMITS.CREDIT - cr);
+
+    // 如果已经满了，就不用计算了，或者返回一个全0的
+    if (reqC === 0 && reqCr === 0) return null;
+
+    return solveOptimalPlan(reqC, reqCr, maxHunt, maxExpert);
+  };
+
+  const dynamicPlan = getDynamicPlan();
 
   useEffect(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -244,11 +237,9 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const addReward = (type: Task) => {
-    const newContrib = Math.min(LIMITS.CONTRIB, (Number(currContrib) || 0) + type.contrib);
-    const newCredit = Math.min(LIMITS.CREDIT, (Number(currCredit) || 0) + type.credit);
-    setCurrContrib(newContrib);
-    setCurrCredit(newCredit);
+  const addReward = (task: Task) => {
+    setCurrContrib(prev => Math.min(LIMITS.CONTRIB, Number(prev) + task.contrib));
+    setCurrCredit(prev => Math.min(LIMITS.CREDIT, Number(prev) + task.credit));
   };
 
   const resetCalc = () => {
@@ -256,19 +247,17 @@ const App = () => {
     setCurrCredit('');
   };
 
-  const plans = generatePlans(Number(currContrib) || 0, Number(currCredit) || 0);
-
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-orange-500/30 pb-20">
 
-      {/* 顶部：计算器与规划 */}
+      {/* 顶部：计算器 */}
       <div className="bg-[#121214] border-b border-zinc-800 sticky top-0 z-30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           <div className="flex flex-col gap-6">
 
-            {/* 第一行：标题 + 输入 + 按钮 */}
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="flex items-center gap-3 min-w-fit">
+            {/* 标题栏 */}
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-600 rounded flex items-center justify-center shadow-[0_0_15px_rgba(234,88,12,0.4)]">
                   <Calculator className="w-6 h-6 text-white" />
                 </div>
@@ -277,124 +266,174 @@ const App = () => {
                     PROXY <span className="text-orange-500">CALC</span>
                   </h1>
                   <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">
-                    周常进度规划
+                    智能委托规划
                   </p>
                 </div>
               </div>
 
               {/* 输入区域 */}
-              <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-3 items-center">
-                <div className="bg-zinc-900/50 p-2 rounded border border-zinc-800 flex items-center gap-2">
-                  <Hexagon className="w-4 h-4 text-purple-500 shrink-0" />
+              <div className="flex-1 w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* 进度输入 */}
+                <div className="bg-black/40 p-2 rounded border border-white/5 flex items-center gap-2 group focus-within:border-purple-500/50 transition-colors">
+                  <Ghost className="w-4 h-4 text-purple-500 shrink-0" />
                   <input
                     type="number"
                     value={currContrib}
                     onChange={e => setCurrContrib(e.target.value)}
                     placeholder="0"
-                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-600"
+                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                   />
-                  <span className="text-[10px] text-zinc-500 font-mono">/{LIMITS.CONTRIB}</span>
+                  <span className="text-[10px] text-zinc-600 font-mono">/{LIMITS.CONTRIB}</span>
                 </div>
 
-                <div className="bg-zinc-900/50 p-2 rounded border border-zinc-800 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-teal-500 shrink-0" />
+                <div className="bg-black/40 p-2 rounded border border-white/5 flex items-center gap-2 group focus-within:border-teal-500/50 transition-colors">
+                  <Calculator className="w-4 h-4 text-teal-500 shrink-0" />
                   <input
                     type="number"
                     value={currCredit}
                     onChange={e => setCurrCredit(e.target.value)}
                     placeholder="0"
-                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-600"
+                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                   />
-                  <span className="text-[10px] text-zinc-500 font-mono">/{LIMITS.CREDIT}</span>
+                  <span className="text-[10px] text-zinc-600 font-mono">/{LIMITS.CREDIT}</span>
                 </div>
 
-                {/* 快捷按钮组 */}
-                <div className="col-span-2 flex gap-2 justify-end">
-                  <button onClick={() => addReward(TASKS.HOLLOW)} className={`group border-purple-500/30 text-purple-200 bg-purple-500/10 hover:bg-purple-500/20 ${SHORTCUT_BTN_CLASS}`}>
-                    <Ghost className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> 普通空洞
-                  </button>
-                  <button onClick={() => addReward(TASKS.HUNT)} className={`group border-orange-500/30 text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 ${SHORTCUT_BTN_CLASS}`}>
-                    <Sword className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> 恶名狩猎
-                  </button>
-                  <button onClick={() => addReward(TASKS.EXPERT)} className={`group border-blue-500/30 text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 ${SHORTCUT_BTN_CLASS}`}>
-                    <Trophy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> 专业挑战
-                  </button>
-                  <button onClick={resetCalc} className="p-2 text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded">
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
+                {/* 限制配置 */}
+                <div className="bg-black/40 p-2 rounded border border-white/5 flex items-center gap-2 group focus-within:border-orange-500/50 transition-colors cursor-help relative" title="本周剩余可打次数">
+                  <Sword className="w-4 h-4 text-orange-500 shrink-0" />
+                  <input
+                    type="number"
+                    value={maxHunt}
+                    onChange={e => setMaxHunt(Number(e.target.value))}
+                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                  />
+                  <span className="text-[10px] text-zinc-600 font-mono whitespace-nowrap">Hunt Max</span>
                 </div>
+
+                <div className="bg-black/40 p-2 rounded border border-white/5 flex items-center gap-2 group focus-within:border-blue-500/50 transition-colors cursor-help relative" title="本周剩余可打次数">
+                  <Trophy className="w-4 h-4 text-blue-500 shrink-0" />
+                  <input
+                    type="number"
+                    value={maxExpert}
+                    onChange={e => setMaxExpert(Number(e.target.value))}
+                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                  />
+                  <span className="text-[10px] text-zinc-600 font-mono whitespace-nowrap">Expert Max</span>
+                </div>
+              </div>
+
+              {/* 控制按钮 */}
+              <div className="flex gap-2">
+                <button onClick={resetCalc} className="p-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            {/* 第二行：方案卡片 */}
-            {plans && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2">
-                {plans.map((plan) => (
-                  <div key={plan.id} className={`bg-zinc-900/40 border ${plan.border} rounded-lg p-3 flex flex-col gap-2 relative overflow-hidden group`}>
-                    <div className="flex justify-between items-start z-10">
-                      <div>
-                        <h3 className={`text-sm font-bold ${plan.color} flex items-center gap-2`}>
-                          {plan.title}
-                        </h3>
-                        <p className="text-[10px] text-zinc-500 font-mono">{plan.desc}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xl font-black text-white font-mono block leading-none">
-                          {Math.ceil(plan.data.totalTime / 60)}
-                        </span>
-                        <span className="text-[10px] text-zinc-600 uppercase font-bold">MINUTES</span>
-                      </div>
-                    </div>
+            {/* 结果展示区：双卡布局 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
 
-                    <div className="grid grid-cols-3 gap-1 mt-1 z-10">
-                      <div className={`${STAT_PILL_CLASS}`}><Ghost className="w-3 h-3 text-purple-400" /> {plan.data.counts.hollow}</div>
-                      <div className={`${STAT_PILL_CLASS}`}><Sword className="w-3 h-3 text-orange-400" /> {plan.data.counts.hunt}</div>
-                      <div className={`${STAT_PILL_CLASS}`}><Trophy className="w-3 h-3 text-blue-400" /> {plan.data.counts.expert}</div>
-                    </div>
+              {/* 卡片1：动态规划结果 (左侧) */}
+              <div className={`bg-zinc-900/50 border ${dynamicPlan ? 'border-orange-500/30' : 'border-zinc-800'} rounded-xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[160px]`}>
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    🚀 当前规划
+                    {dynamicPlan && <span className="text-[10px] px-1.5 py-0.5 bg-orange-500/20 text-orange-300 rounded border border-orange-500/20">CUSTOM</span>}
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-1">基于左侧进度与上限设置的特定方案</p>
+                </div>
 
-                    {/* 背景光效 */}
-                    <div className={`absolute -right-4 -bottom-4 w-20 h-20 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity bg-current ${plan.color}`}></div>
+                {dynamicPlan ? (
+                  <div className="mt-4">
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <span className="text-4xl font-black text-white tracking-tighter">{Math.ceil(dynamicPlan.totalTime / 60)}</span>
+                      <span className="text-xs font-bold text-zinc-500 uppercase">Minutes Needed</span>
+                    </div>
+                    <div className="flex gap-2">
+                      {dynamicPlan.counts.hunt > 0 && <span className="px-2 py-1 bg-orange-500/10 border border-orange-500/20 rounded text-xs text-orange-300 font-mono font-bold flex items-center gap-1"><Sword className="w-3 h-3" /> {dynamicPlan.counts.hunt}</span>}
+                      {dynamicPlan.counts.expert > 0 && <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-xs text-blue-300 font-mono font-bold flex items-center gap-1"><Trophy className="w-3 h-3" /> {dynamicPlan.counts.expert}</span>}
+                      {dynamicPlan.counts.hollow > 0 && <span className="px-2 py-1 bg-purple-500/10 border border-purple-500/20 rounded text-xs text-purple-300 font-mono font-bold flex items-center gap-1"><Ghost className="w-3 h-3" /> {dynamicPlan.counts.hollow}</span>}
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="flex items-center justify-center h-full text-zinc-600 text-sm font-mono mt-4">
+                    目标已达成 / 无需规划
+                  </div>
+                )}
+                {/* 动态背景光效 */}
+                <div className="absolute right-0 top-0 w-32 h-32 bg-orange-500/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
               </div>
-            )}
+
+              {/* 卡片2：基准参考 (右侧，三合一) */}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 relative overflow-hidden flex flex-col gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-200 flex items-center gap-2">📊 每周概览</h3>
+                  <p className="text-xs text-zinc-500 mt-1">从零开始打满周上限的耗时参考</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 mt-1">
+                  {/* Best */}
+                  <div className="flex items-center justify-between p-2 rounded bg-emerald-500/5 border border-emerald-500/10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span className="text-xs font-bold text-emerald-100">高效率</span>
+                      <span className="text-[10px] text-zinc-500 font-mono">(5Hunt + Hollow)</span>
+                    </div>
+                    <span className="text-sm font-black text-emerald-400 font-mono">{Math.ceil(benchmarks.best.totalTime / 60)} <span className="text-[10px] text-zinc-600">MIN</span></span>
+                  </div>
+                  {/* Mid */}
+                  <div className="flex items-center justify-between p-2 rounded bg-blue-500/5 border border-blue-500/10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                      <span className="text-xs font-bold text-blue-100">均衡型</span>
+                      <span className="text-[10px] text-zinc-500 font-mono">(5Expert + Hollow)</span>
+                    </div>
+                    <span className="text-sm font-black text-blue-400 font-mono">{Math.ceil(benchmarks.mod.totalTime / 60)} <span className="text-[10px] text-zinc-600">MIN</span></span>
+                  </div>
+                  {/* Worst */}
+                  <div className="flex items-center justify-between p-2 rounded bg-rose-500/5 border border-rose-500/10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      <span className="text-xs font-bold text-rose-100">基础型</span>
+                      <span className="text-[10px] text-zinc-500 font-mono">(All Hollow)</span>
+                    </div>
+                    <span className="text-sm font-black text-rose-400 font-mono">{Math.ceil(benchmarks.worst.totalTime / 60)} <span className="text-[10px] text-zinc-600">MIN</span></span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 主内容区域 */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
-
-        {/* 居中搜索栏 */}
-        <div className="max-w-2xl mx-auto mb-10 relative group">
-          <div className={`absolute inset-0 bg-orange-500/20 rounded-full blur-xl transition-opacity duration-300 ${isFocused ? 'opacity-100' : 'opacity-0'}`}></div>
-          <div className="relative flex items-center">
-            <Search className={`absolute left-4 w-5 h-5 transition-colors ${isFocused ? 'text-orange-400' : 'text-zinc-500'}`} />
-            <input
-              ref={inputRef}
-              type="text"
-              className="w-full bg-[#18181b] border-2 border-zinc-800 hover:border-zinc-700 focus:border-orange-500/50 rounded-full py-4 pl-12 pr-16 text-lg font-bold text-white placeholder-zinc-600 outline-none transition-all shadow-xl"
-              placeholder="搜索委托 (按 '/' 快速聚焦)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 p-1 text-zinc-500 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
+      {/* 底部：搜索与列表 */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+        {/* 搜索框 */}
+        <div className="relative mb-8 group z-20">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-orange-500' : 'text-zinc-500'}`} />
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            className="w-full bg-zinc-900 border-2 border-zinc-800 text-zinc-100 rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-orange-500/50 focus:bg-zinc-900/80 transition-all font-mono shadow-lg"
+            placeholder="搜索副本名称, 拼音或缩写... (Press '/')"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+          />
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+            <span className="text-xs text-zinc-700 font-mono border border-zinc-800 rounded px-2 py-1">ESC to blur</span>
           </div>
         </div>
 
-        {/* 列表网格 */}
+        {/* 列表内容 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredData.map((item, index) => {
-            const timeColor = getHeatmapColor(item.sec);
+            const heatColor = getHeatmapColor(item.sec);
+
             // 难度标签根据时间判断
             let diffLabel = "极速";
             let diffColor = "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
@@ -402,11 +441,10 @@ const App = () => {
             if (item.sec > 240) { diffLabel = "困难"; diffColor = "text-rose-400 border-rose-500/30 bg-rose-500/10"; }
 
             // Heat Bar Scale Calculation
-            // Rule: 30s -> 0%, 240s (4m) -> 90%
             const MIN_SEC = 30;
             const PIVOT_SEC = 240;
             const PIVOT_PER = 90;
-            const MAX_SEC = 480; // Caps at 8m for remaining 10%
+            const MAX_SEC = 480;
 
             const getPercent = (s: number) => {
               if (s <= MIN_SEC) return 0;
@@ -422,12 +460,13 @@ const App = () => {
 
             return (
               <div
-                key={`${item.name}-${index}`}
-                className="bg-[#18181b] border border-zinc-800 rounded-xl p-4 flex flex-col justify-between group hover:border-zinc-600 transition-all hover:-translate-y-1 hover:shadow-lg relative overflow-hidden"
+                key={index}
+                onClick={() => addReward(TASKS.HOLLOW)}
+                className="group bg-zinc-900/50 border border-zinc-800/50 hover:border-orange-500/50 rounded-lg p-4 transition-all hover:bg-zinc-800/50 cursor-pointer relative overflow-hidden flex flex-col justify-between"
               >
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start mb-3 relative z-10">
                   <div className="flex flex-col">
-                    <span className="text-3xl font-black font-mono tracking-tighter" style={{ color: timeColor }}>
+                    <span className="text-3xl font-black font-mono tracking-tighter" style={{ color: heatColor }}>
                       {item.time}
                     </span>
                   </div>
@@ -436,36 +475,43 @@ const App = () => {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <h3
-                    className="text-lg font-bold leading-tight truncate transition-colors duration-300 text-zinc-200 group-hover:text-white"
-                  >
+                <div className="mb-4 relative z-10">
+                  <h3 className="font-bold text-zinc-200 group-hover:text-orange-400 transition-colors line-clamp-1" title={item.name}>
                     {item.name}
                   </h3>
                   <p className="text-[10px] font-mono text-zinc-600 mt-1 uppercase">ID: {item.abbr}</p>
                 </div>
 
                 {/* Heat Bar */}
-                <div className="relative h-2 bg-zinc-800/50 rounded-full w-full overflow-hidden mt-auto">
-                  {/* Tick Marks for 2m and 4m */}
+                <div className="relative h-2 bg-zinc-800/50 rounded-full w-full overflow-hidden mt-auto z-10">
+                  {/* Tick Marks */}
                   <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${p2m}%` }}></div>
                   <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${p4m}%` }}></div>
 
-                  {/* Progress with Time Color */}
-                  <div
-                    className="h-full rounded-full transition-all duration-500 relative"
-                    style={{ width: `${percent}%`, backgroundColor: timeColor }}
-                  />
+                  {/* Progress */}
+                  <div className="h-full rounded-full transition-all duration-500 relative" style={{ width: `${percent}%`, backgroundColor: heatColor }}></div>
                 </div>
 
-                <div
-                  className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none transition-opacity opacity-0 group-hover:opacity-100"
-                  style={{ backgroundColor: timeColor, opacity: 0.1 }}
-                />
+                {/* 悬停提示 */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 backdrop-blur-[1px] transition-opacity z-20">
+                  <span className="text-orange-400 font-bold text-sm tracking-widest uppercase flex items-center gap-1">
+                    <Calculator className="w-3 h-3" /> 点击添加
+                  </span>
+                </div>
+
+                {/* Card BG Glow */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none transition-opacity opacity-0 group-hover:opacity-100" style={{ backgroundColor: heatColor, opacity: 0.1 }}></div>
+
               </div>
             );
           })}
         </div>
+
+        {filteredData.length === 0 && (
+          <div className="text-center py-20 text-zinc-500 font-mono">
+            无匹配结果 / NO RESULTS
+          </div>
+        )}
       </div>
     </div>
   );
