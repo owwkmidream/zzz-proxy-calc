@@ -403,7 +403,7 @@ const App = () => {
               </div>
             </div>
           </div>
-          
+
           {/* 统一交互区 (Controls + Search) */}
           <div className="bg-[#121214] border border-zinc-800 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col gap-6">
 
@@ -422,7 +422,7 @@ const App = () => {
                     value={currContrib}
                     onChange={e => setCurrContrib(e.target.value)}
                     placeholder="0"
-                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                    className="no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                   />
                   <span className="text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CONTRIB}</span>
                 </div>
@@ -436,7 +436,7 @@ const App = () => {
                     value={currCredit}
                     onChange={e => setCurrCredit(e.target.value)}
                     placeholder="0"
-                    className="bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                    className="no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                   />
                   <span className="text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CREDIT}</span>
                 </div>
@@ -446,28 +446,48 @@ const App = () => {
                   <div className="h-8 w-8 rounded bg-orange-500/10 flex items-center justify-center shrink-0 cursor-help" title="Hunt Max">
                     <Sword className="w-4 h-4 text-orange-500" />
                   </div>
-                  <button onClick={() => handleAdjust(setMaxHunt, -1)} className="w-6 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 rounded-sm">-</button>
+                  <button
+                    onClick={() => handleAdjust(setMaxHunt, -1)}
+                    className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95"
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     value={maxHunt}
                     onChange={e => setMaxHunt(Number(e.target.value))}
-                    className="bg-transparent w-full text-center text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                    className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                   />
-                  <button onClick={() => handleAdjust(setMaxHunt, 1)} className="w-6 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 rounded-sm">+</button>
+                  <button
+                    onClick={() => handleAdjust(setMaxHunt, 1)}
+                    className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95"
+                  >
+                    +
+                  </button>
                 </div>
 
                 <div className="bg-black/40 p-1.5 rounded border border-white/5 flex items-center gap-1 group focus-within:border-blue-500/50 transition-colors">
                   <div className="h-8 w-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 cursor-help" title="Expert Max">
                     <Trophy className="w-4 h-4 text-blue-500" />
                   </div>
-                  <button onClick={() => handleAdjust(setMaxExpert, -1)} className="w-6 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 rounded-sm">-</button>
+                  <button
+                    onClick={() => handleAdjust(setMaxExpert, -1)}
+                    className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     value={maxExpert}
                     onChange={e => setMaxExpert(Number(e.target.value))}
-                    className="bg-transparent w-full text-center text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                    className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                   />
-                  <button onClick={() => handleAdjust(setMaxExpert, 1)} className="w-6 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 rounded-sm">+</button>
+                  <button
+                    onClick={() => handleAdjust(setMaxExpert, 1)}
+                    className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
