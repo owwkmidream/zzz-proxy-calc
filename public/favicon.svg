@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- 圆角矩形背景 -->
+  <rect x="5" y="5" width="90" height="90" rx="18" ry="18" fill="url(#bgGrad)"/>
+  <!-- 计算器屏幕 -->
+  <rect x="15" y="15" width="70" height="25" rx="4" ry="4" fill="#09090b" opacity="0.8"/>
+  <!-- 数字显示 -->
+  <text x="78" y="34" fill="#ffffff" font-family="monospace" font-size="18" font-weight="bold" text-anchor="end">1000</text>
+  <!-- 按钮网格 -->
+  <g fill="#ffffff" opacity="0.9">
+    <!-- 第一行 -->
+    <rect x="15" y="48" width="14" height="11" rx="2"/>
+    <rect x="33" y="48" width="14" height="11" rx="2"/>
+    <rect x="51" y="48" width="14" height="11" rx="2"/>
+    <rect x="69" y="48" width="16" height="11" rx="2" fill="#09090b" opacity="0.6"/>
+    <!-- 第二行 -->
+    <rect x="15" y="63" width="14" height="11" rx="2"/>
+    <rect x="33" y="63" width="14" height="11" rx="2"/>
+    <rect x="51" y="63" width="14" height="11" rx="2"/>
+    <rect x="69" y="63" width="16" height="11" rx="2" fill="#09090b" opacity="0.6"/>
+    <!-- 第三行 -->
+    <rect x="15" y="78" width="14" height="11" rx="2"/>
+    <rect x="33" y="78" width="14" height="11" rx="2"/>
+    <rect x="51" y="78" width="14" height="11" rx="2"/>
+    <rect x="69" y="78" width="16" height="11" rx="2" fill="#09090b" opacity="0.6"/>
+  </g>
+</svg>
