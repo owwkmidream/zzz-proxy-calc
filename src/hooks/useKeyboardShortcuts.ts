@@ -1,17 +1,18 @@
 import { useEffect, type RefObject } from 'react';
 
-export const useKeyboardShortcuts = (inputRef: RefObject<HTMLInputElement | null>) => {
+export const useKeyboardShortcuts = (
+    inputRef: RefObject<HTMLInputElement | null>,
+    clearSearch: () => void
+) => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === '/' && document.activeElement !== inputRef.current) {
+            if (e.key === '/') {
                 e.preventDefault();
+                clearSearch();
                 inputRef.current?.focus();
-            }
-            if (e.key === 'Escape') {
-                inputRef.current?.blur();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [inputRef]);
+    }, [inputRef, clearSearch]);
 };

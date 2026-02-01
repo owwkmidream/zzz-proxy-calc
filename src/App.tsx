@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 
 // Hooks
 import { useSearch } from './hooks/useSearch';
@@ -24,8 +24,11 @@ const App = () => {
   // 搜索逻辑
   const { searchQuery, setSearchQuery, filteredData } = useSearch();
 
+  // 清空搜索
+  const clearSearch = useCallback(() => setSearchQuery(''), [setSearchQuery]);
+
   // 键盘快捷键
-  useKeyboardShortcuts(inputRef);
+  useKeyboardShortcuts(inputRef, clearSearch);
 
   // 计算器逻辑
   const {
@@ -84,6 +87,7 @@ const App = () => {
               ref={inputRef}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+              onClear={clearSearch}
             />
           </div>
 
