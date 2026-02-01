@@ -5,7 +5,7 @@ export const LIMITS = { CONTRIB: 1000, CREDIT: 5000 };
 
 // 调整后的基准参数
 export const TASKS: Record<string, TaskWithLimit> = {
-    HOLLOW: { id: 'hollow', name: "普通空洞", contrib: 80, credit: 600, time: 150 },
+    HOLLOW: { id: 'hollow', name: "普通空洞", contrib: 80, credit: 600, time: 120 },
     HUNT: { id: 'hunt', name: "恶名狩猎", contrib: 100, credit: 500, time: 60 },
     EXPERT: { id: 'expert', name: "专业挑战", contrib: 70, credit: 250, time: 60 }
 };

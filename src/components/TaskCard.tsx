@@ -35,8 +35,8 @@ export const TaskCard = ({ item, highlightedName }: TaskCardProps) => {
 
             {/* Heat Bar */}
             <div className="relative h-2 bg-zinc-800/50 rounded-full w-full overflow-hidden mt-auto z-10">
-                <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${MARKER_POSITIONS.TWO_MINUTES}%` }}></div>
-                <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${MARKER_POSITIONS.FOUR_MINUTES}%` }}></div>
+                <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${MARKER_POSITIONS.NINETY_SECONDS}%` }}></div>
+                <div className="absolute top-0 bottom-0 w-[2px] bg-zinc-700/80 z-10" style={{ left: `${MARKER_POSITIONS.THREE_MINUTES}%` }}></div>
                 <div className="h-full rounded-full transition-all duration-500 relative" style={{ width: `${percent}%`, backgroundColor: heatColor }}></div>
             </div>
 
