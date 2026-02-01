@@ -1,11 +1,28 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, X, Zap, Hexagon, Users, Calculator, Clock, Target, Sword, Trophy, TrendingUp, Timer, LayoutDashboard, Ghost, RotateCcw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, X, Hexagon, Users, Calculator, Sword, Trophy, Ghost, RotateCcw } from 'lucide-react';
+
+// --- 类型定义 ---
+interface Task {
+  id: string;
+  name: string;
+  contrib: number;
+  credit: number;
+  time: number;
+}
+
+interface RawDataItem {
+  name: string;
+  time: string;
+  sec: number;
+  py: string;
+  abbr: string;
+}
 
 // --- 常量配置 ---
 const LIMITS = { CONTRIB: 1000, CREDIT: 5000 };
 
 // 调整后的基准参数
-const TASKS = {
+const TASKS: Record<string, Task> = {
   HOLLOW: { id: 'hollow', name: "普通空洞", contrib: 80, credit: 600, time: 150 }, // 2.5 min
   HUNT: { id: 'hunt', name: "恶名狩猎", contrib: 100, credit: 500, time: 60 },     // 1 min
   EXPERT: { id: 'expert', name: "专业挑战", contrib: 70, credit: 250, time: 60 }   // 1 min
@@ -100,7 +117,7 @@ const rawData = [
 // --- 工具函数 ---
 
 // 修复后的热力图颜色算法 (>=30s start, 2m=Yellow, 4m=Red)
-const getHeatmapColor = (seconds) => {
+const getHeatmapColor = (seconds: number) => {
   if (seconds <= 30) return `hsl(130, 100%, 60%)`; // 0-30s same as Green
 
   let hue = 0;
@@ -120,13 +137,13 @@ const getHeatmapColor = (seconds) => {
 };
 
 // 确定性的策略模拟器
-const simulateStrategies = (reqC, reqCr, strategy) => {
+const simulateStrategies = (reqC: number, reqCr: number, strategy: string) => {
   let c = 0;
   let cr = 0;
-  let counts = { hollow: 0, hunt: 0, expert: 0 };
+  let counts: Record<string, number> = { hollow: 0, hunt: 0, expert: 0 };
 
   // 策略优先级队列
-  let order = [];
+  let order: string[] = [];
   if (strategy === 'speed') order = ['hunt', 'expert', 'hollow', 'hunt', 'expert']; // 4:1 ratio approx
   if (strategy === 'balanced') order = ['hollow', 'hunt', 'expert']; // 1:1:1
   if (strategy === 'hollow') order = ['hollow', 'hollow', 'hollow', 'hunt']; // 3:1 ratio approx
@@ -151,7 +168,7 @@ const simulateStrategies = (reqC, reqCr, strategy) => {
 }
 
 // 生成三种方案
-const generatePlans = (currContrib, currCredit) => {
+const generatePlans = (currContrib: number, currCredit: number) => {
   const neededContrib = Math.max(0, LIMITS.CONTRIB - currContrib);
   const neededCredit = Math.max(0, LIMITS.CREDIT - currCredit);
 
@@ -191,13 +208,13 @@ const generatePlans = (currContrib, currCredit) => {
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredData, setFilteredData] = useState(rawData);
+  const [filteredData, setFilteredData] = useState<RawDataItem[]>(rawData);
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 计算器状态
-  const [currContrib, setCurrContrib] = useState('');
-  const [currCredit, setCurrCredit] = useState('');
+  const [currContrib, setCurrContrib] = useState<string | number>('');
+  const [currCredit, setCurrCredit] = useState<string | number>('');
 
   useEffect(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -214,7 +231,7 @@ const App = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current?.focus();
@@ -227,7 +244,7 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const addReward = (type) => {
+  const addReward = (type: Task) => {
     const newContrib = Math.min(LIMITS.CONTRIB, (Number(currContrib) || 0) + type.contrib);
     const newCredit = Math.min(LIMITS.CREDIT, (Number(currCredit) || 0) + type.credit);
     setCurrContrib(newContrib);
@@ -391,7 +408,7 @@ const App = () => {
             const PIVOT_PER = 80;
             const MAX_SEC = 480; // Caps at 8m for remaining 20%
 
-            const getPercent = (s) => {
+            const getPercent = (s: number) => {
               if (s <= MIN_SEC) return 0;
               if (s <= PIVOT_SEC) {
                 return ((s - MIN_SEC) / (PIVOT_SEC - MIN_SEC)) * PIVOT_PER;
