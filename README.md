@@ -1,6 +1,14 @@
 # 📟 ZZZ Proxy Calc | 绝区零委托进度规划器
 
 [![Deno Deploy](https://img.shields.io/badge/Deploy-Deno--Deploy-black?logo=deno)](https://deno.com/deploy)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel)](https://vercel.com/)
+[![Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?logo=netlify)](https://www.netlify.com/)
+[![Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare_Pages-F38020?logo=cloudflare)](https://pages.cloudflare.com/)
+[![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub_Pages-222222?logo=github)](https://pages.github.com/)
+[![Zeabur](https://img.shields.io/badge/Deploy-Zeabur-000000?logo=zeabur)](https://zeabur.com/)
+[![Railway](https://img.shields.io/badge/Deploy-Railway-131415?logo=railway)](https://railway.app/)
+[![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render)](https://render.com/)
+[![Surge](https://img.shields.io/badge/Deploy-Surge-01ADEE?logo=surge)](https://surge.sh/)
 [![Vite](https://img.shields.io/badge/Build-Vite-646CFF?logo=vite)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
