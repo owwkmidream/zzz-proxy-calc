@@ -1,4 +1,5 @@
-import { X, Calculator, Sword, Trophy, Ghost } from 'lucide-react';
+import { X, Sword, Trophy, Ghost } from 'lucide-react';
+import { ContribIcon, CreditIcon } from './Icons';
 import type { Task, TaskWithLimit } from '../types';
 
 interface ControlPanelProps {
@@ -39,7 +40,7 @@ export const ControlPanel = ({
                 {/* 贡献度输入 */}
                 <div className="bg-black/40 p-1.5 rounded border border-white/5 flex items-center gap-2 group focus-within:border-purple-500/50 transition-colors">
                     <div className="h-8 w-8 rounded bg-purple-500/10 flex items-center justify-center shrink-0">
-                        <Ghost className="w-4 h-4 text-purple-500" />
+                        <ContribIcon className="w-5 h-5 text-purple-500" />
                     </div>
                     <input
                         type="number"
@@ -54,7 +55,7 @@ export const ControlPanel = ({
                 {/* 信用点输入 */}
                 <div className="bg-black/40 p-1.5 rounded border border-white/5 flex items-center gap-2 group focus-within:border-teal-500/50 transition-colors">
                     <div className="h-8 w-8 rounded bg-teal-500/10 flex items-center justify-center shrink-0">
-                        <Calculator className="w-4 h-4 text-teal-500" />
+                        <CreditIcon className="w-5 h-5 text-teal-500" />
                     </div>
                     <input
                         type="number"
