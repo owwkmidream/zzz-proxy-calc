@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# 📟 ZZZ Proxy Calc | 绝区零委托进度规划器
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Deno Deploy](https://img.shields.io/badge/Deploy-Deno--Deploy-black?logo=deno)](https://deno.com/deploy)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?logo=vite)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
+[![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-Currently, two official plugins are available:
+一个专为《绝区零》(Zenless Zone Zero) 绳匠设计的周常委托进度规划与查询工具。通过热力图直观展示委托耗时，并根据当前奖励进度提供多种刷取方案。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ 特性
 
-## React Compiler
+-   **🔍 智能搜索**: 支持中文名称、拼音全拼及首字母简拼快速搜索委托。
+-   **🔥 耗时热力图**: 直观的颜色标识（绿色 < 2min, 黄色 < 4min, 红色 > 4min），一眼识别最高效委托。
+-   **🧮 进度计算器**: 输入当前「信赖」与「助威」点数，立即获取补位建议。
+-   **⚡ 三大规划方案**:
+    -   **极速党**: 追求单次 1 分钟内的极致效率。
+    -   **均衡党**: 混合不同类型的委托，兼顾趣味与效率。
+    -   **空洞党**: 针对高价值长时委托进行规划。
+-   **📟 赛博工业风 UI**: 深度还原《绝区零》视觉风格的暗色系交互界面。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 快速开始
 
-## Expanding the ESLint configuration
+### 本地开发
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  克隆仓库:
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/zzz-proxy-calc.git
+    cd zzz-proxy-calc
+    ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2.  安装依赖:
+    ```bash
+    pnpm install
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3.  启动开发服务器:
+    ```bash
+    pnpm dev
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 构建
+
+```bash
+pnpm build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🌐 部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+本项目支持通过 **Deno Deploy** 或 **GitHub Pages** 快速部署。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 部署到 Deno Deploy
+
+1. 在 [Deno Deploy 控制台](https://dash.deno.com/) 点击 "New Project"。
+2. 连接 GitHub 仓库。
+3. 选择 `zzz-proxy-calc` 仓库。
+4. 配置构建设置:
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `pnpm install && pnpm build`
+   - **Publish Directory**: `dist`
+5. 点击 "Deploy Project"。
+
+## 🛠️ 技术栈
+
+-   **Core**: React 19 + TypeScript
+-   **Bundler**: Vite 7
+-   **Styling**: Tailwind CSS
+-   **Icons**: Lucide React
+
+## 📄 开源协议
+
+MIT License
