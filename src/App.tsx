@@ -402,11 +402,11 @@ const App = () => {
             if (item.sec > 240) { diffLabel = "困难"; diffColor = "text-rose-400 border-rose-500/30 bg-rose-500/10"; }
 
             // Heat Bar Scale Calculation
-            // Rule: 30s -> 0%, 240s (4m) -> 80%
+            // Rule: 30s -> 0%, 240s (4m) -> 90%
             const MIN_SEC = 30;
             const PIVOT_SEC = 240;
-            const PIVOT_PER = 80;
-            const MAX_SEC = 480; // Caps at 8m for remaining 20%
+            const PIVOT_PER = 90;
+            const MAX_SEC = 480; // Caps at 8m for remaining 10%
 
             const getPercent = (s: number) => {
               if (s <= MIN_SEC) return 0;
@@ -455,10 +455,7 @@ const App = () => {
                   <div
                     className="h-full rounded-full transition-all duration-500 relative"
                     style={{ width: `${percent}%`, backgroundColor: timeColor }}
-                  >
-                    {/* Leading Edge */}
-                    <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/50 shadow-[0_0_8px_rgba(255,255,255,0.8)]"></div>
-                  </div>
+                  />
                 </div>
 
                 <div
