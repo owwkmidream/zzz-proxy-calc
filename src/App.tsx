@@ -43,6 +43,7 @@ const App = () => {
     animationDeltas,
     benchmarks,
     dynamicPlan,
+    singleTaskCounts, // 获取单任务上限
     addReward,
     resetCalc,
     handleAdjust,
@@ -82,6 +83,7 @@ const App = () => {
               TASKS={TASKS}
               LIMITS={LIMITS}
               animationDeltas={animationDeltas}
+              singleTaskCounts={singleTaskCounts}
             />
 
             {/* 下半部分：搜索栏 */}

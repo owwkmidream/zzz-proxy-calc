@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Task, PlanResult, Benchmarks } from '../types';
 import { LIMITS, TASKS } from '../constants';
-import { calculateDynamicPlan, generateBenchmarks } from '../utils/solver';
+import { calculateDynamicPlan, generateBenchmarks, calculateSingleTaskCounts } from '../utils/solver';
 
 // 动画变化值的类型
 export interface AnimationDeltas {
@@ -84,6 +84,13 @@ export const useCalculator = () => {
         );
     }, [currContrib, currCredit, maxHunt, maxExpert]);
 
+    // 计算理论最大所需次数（用于UI上限限制）
+    const singleTaskCounts = useMemo(() => {
+        const reqC = Math.max(0, LIMITS.CONTRIB - (Number(currContrib) || 0));
+        const reqCr = Math.max(0, LIMITS.CREDIT - (Number(currCredit) || 0));
+        return calculateSingleTaskCounts(reqC, reqCr);
+    }, [currContrib, currCredit]);
+
     // 添加奖励并减少对应的任务限制
     const addReward = useCallback((task: Task) => {
         // 计算变动值
@@ -133,9 +140,10 @@ export const useCalculator = () => {
 
     const handleAdjust = (
         setter: React.Dispatch<React.SetStateAction<number>>,
-        value: number
+        value: number,
+        maxVal: number = 99 // 默认回退值
     ) => {
-        setter(prev => Math.max(0, prev + value));
+        setter(prev => Math.max(0, Math.min(maxVal, prev + value)));
     };
 
     return {
@@ -153,6 +161,7 @@ export const useCalculator = () => {
         // Computed
         benchmarks,
         dynamicPlan,
+        singleTaskCounts, // Expose this
         // Actions
         addReward,
         resetCalc,

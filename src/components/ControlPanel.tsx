@@ -14,10 +14,11 @@ interface ControlPanelProps {
     setMaxExpert: React.Dispatch<React.SetStateAction<number>>;
     onAddReward: (task: Task) => void;
     onReset: () => void;
-    handleAdjust: (setter: React.Dispatch<React.SetStateAction<number>>, value: number) => void;
+    handleAdjust: (setter: React.Dispatch<React.SetStateAction<number>>, value: number, maxVal?: number) => void;
     TASKS: Record<string, TaskWithLimit>;
     LIMITS: { CONTRIB: number; CREDIT: number };
     animationDeltas: AnimationDeltas;
+    singleTaskCounts: Record<string, number>;
 }
 
 export const ControlPanel = ({
@@ -35,7 +36,12 @@ export const ControlPanel = ({
     TASKS,
     LIMITS,
     animationDeltas,
+    singleTaskCounts,
 }: ControlPanelProps) => {
+    // 获取动态上限
+    const huntLimit = singleTaskCounts[TASKS.HUNT.id] || 99;
+    const expertLimit = singleTaskCounts[TASKS.EXPERT.id] || 99;
+
     return (
         <div className="flex flex-col xl:flex-row gap-6 items-stretch xl:items-center">
             {/* 1. 进度与限制 */}
@@ -125,12 +131,12 @@ export const ControlPanel = ({
                     ? 'border-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.4)]'
                     : 'border-white/5 focus-within:border-orange-500/50'
                     }`}>
-                    <div className="h-8 w-8 rounded bg-orange-500/10 flex items-center justify-center shrink-0 cursor-help" title="Hunt Max">
+                    <div className="h-8 w-8 rounded bg-orange-500/10 flex items-center justify-center shrink-0 cursor-help" title={`Hunt Max (建议上限: ${huntLimit})`}>
                         <Sword className="w-4 h-4 text-orange-500" />
                     </div>
                     <button
                         onClick={() => {
-                            if (maxHunt > 0) handleAdjust(setMaxHunt, -1);
+                            if (maxHunt > 0) handleAdjust(setMaxHunt, -1, huntLimit);
                         }}
                         disabled={maxHunt <= 0}
                         className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -140,7 +146,7 @@ export const ControlPanel = ({
                     <input
                         type="number"
                         min={0}
-                        max={99}
+                        max={huntLimit}
                         value={maxHunt}
                         onChange={e => {
                             const val = e.target.value;
@@ -150,16 +156,16 @@ export const ControlPanel = ({
                             }
                             const num = parseInt(val, 10);
                             if (!isNaN(num)) {
-                                setMaxHunt(Math.max(0, Math.min(num, 99)));
+                                setMaxHunt(Math.max(0, Math.min(num, huntLimit)));
                             }
                         }}
                         className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                     />
                     <button
                         onClick={() => {
-                            if (maxHunt < 99) handleAdjust(setMaxHunt, 1);
+                            if (maxHunt < huntLimit) handleAdjust(setMaxHunt, 1, huntLimit);
                         }}
-                        disabled={maxHunt >= 99}
+                        disabled={maxHunt >= huntLimit}
                         className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         +
@@ -177,12 +183,12 @@ export const ControlPanel = ({
                     ? 'border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.4)]'
                     : 'border-white/5 focus-within:border-blue-500/50'
                     }`}>
-                    <div className="h-8 w-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 cursor-help" title="Expert Max">
+                    <div className="h-8 w-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 cursor-help" title={`Expert Max (建议上限: ${expertLimit})`}>
                         <Trophy className="w-4 h-4 text-blue-500" />
                     </div>
                     <button
                         onClick={() => {
-                            if (maxExpert > 0) handleAdjust(setMaxExpert, -1);
+                            if (maxExpert > 0) handleAdjust(setMaxExpert, -1, expertLimit);
                         }}
                         disabled={maxExpert <= 0}
                         className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -192,7 +198,7 @@ export const ControlPanel = ({
                     <input
                         type="number"
                         min={0}
-                        max={99}
+                        max={expertLimit}
                         value={maxExpert}
                         onChange={e => {
                             const val = e.target.value;
@@ -202,16 +208,16 @@ export const ControlPanel = ({
                             }
                             const num = parseInt(val, 10);
                             if (!isNaN(num)) {
-                                setMaxExpert(Math.max(0, Math.min(num, 99)));
+                                setMaxExpert(Math.max(0, Math.min(num, expertLimit)));
                             }
                         }}
                         className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                     />
                     <button
                         onClick={() => {
-                            if (maxExpert < 99) handleAdjust(setMaxExpert, 1);
+                            if (maxExpert < expertLimit) handleAdjust(setMaxExpert, 1, expertLimit);
                         }}
-                        disabled={maxExpert >= 99}
+                        disabled={maxExpert >= expertLimit}
                         className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         +
