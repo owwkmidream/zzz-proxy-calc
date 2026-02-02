@@ -37,9 +37,9 @@ const calculateEfficiency = (
     // 基础效率 = 总进度贡献 / 时间
     const baseEfficiency = (cProgress + crProgress) / task.time;
 
-    // 加入微小的"单次收益加成"因子（万分之一量级）
+    // 加入微小的"单次收益加成"因子（十万分之一量级）
     // 当效率相近时，优先选择单次收益更高的任务，减少总任务次数
-    const singleRunBonus = (effectiveC + effectiveCr) * 0.0000001;
+    const singleRunBonus = (effectiveC + effectiveCr) * 0.000000001;
 
     return baseEfficiency + singleRunBonus;
 };
