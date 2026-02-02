@@ -5,7 +5,23 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      keyframes: {
+        'float-up': {
+          '0%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+          '100%': {
+            opacity: '0',
+            transform: 'translateY(-16px)',
+          },
+        },
+      },
+      animation: {
+        'float-up': 'float-up 1s ease-out forwards',
+      },
+    },
   },
   plugins: [],
 }

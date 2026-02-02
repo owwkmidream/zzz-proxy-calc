@@ -40,6 +40,7 @@ const App = () => {
     setMaxHunt,
     maxExpert,
     setMaxExpert,
+    animationDeltas,
     benchmarks,
     dynamicPlan,
     addReward,
@@ -80,6 +81,7 @@ const App = () => {
               handleAdjust={handleAdjust}
               TASKS={TASKS}
               LIMITS={LIMITS}
+              animationDeltas={animationDeltas}
             />
 
             {/* 下半部分：搜索栏 */}

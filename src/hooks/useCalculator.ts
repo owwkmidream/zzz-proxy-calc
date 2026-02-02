@@ -1,7 +1,15 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Task, PlanResult, Benchmarks } from '../types';
 import { LIMITS, TASKS } from '../constants';
 import { calculateDynamicPlan, generateBenchmarks } from '../utils/solver';
+
+// 动画变化值的类型
+export interface AnimationDeltas {
+    contrib: number | null;
+    credit: number | null;
+    maxHunt: number | null;
+    maxExpert: number | null;
+}
 
 // LocalStorage keys
 const STORAGE_KEYS = {
@@ -24,18 +32,27 @@ const loadFromStorage = <T>(key: string, defaultValue: T): T => {
 
 export const useCalculator = () => {
     // 初始化时从 localStorage 读取
-    const [currContrib, setCurrContrib] = useState<string | number>(() => 
+    const [currContrib, setCurrContrib] = useState<string | number>(() =>
         loadFromStorage(STORAGE_KEYS.CONTRIB, '')
     );
-    const [currCredit, setCurrCredit] = useState<string | number>(() => 
+    const [currCredit, setCurrCredit] = useState<string | number>(() =>
         loadFromStorage(STORAGE_KEYS.CREDIT, '')
     );
-    const [maxHunt, setMaxHunt] = useState<number>(() => 
+    const [maxHunt, setMaxHunt] = useState<number>(() =>
         loadFromStorage(STORAGE_KEYS.MAX_HUNT, 3)
     );
-    const [maxExpert, setMaxExpert] = useState<number>(() => 
+    const [maxExpert, setMaxExpert] = useState<number>(() =>
         loadFromStorage(STORAGE_KEYS.MAX_EXPERT, 5)
     );
+
+    // 动画变化值状态
+    const [animationDeltas, setAnimationDeltas] = useState<AnimationDeltas>({
+        contrib: null,
+        credit: null,
+        maxHunt: null,
+        maxExpert: null,
+    });
+    const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 持久化到 localStorage
     useEffect(() => {
@@ -69,9 +86,36 @@ export const useCalculator = () => {
 
     // 添加奖励并减少对应的任务限制
     const addReward = useCallback((task: Task) => {
+        // 计算变动值
+        const deltas: AnimationDeltas = {
+            contrib: task.contrib > 0 ? task.contrib : null,
+            credit: task.credit > 0 ? task.credit : null,
+            maxHunt: task.id === 'hunt' ? -1 : null,
+            maxExpert: task.id === 'expert' ? -1 : null,
+        };
+
+        // 设置动画状态
+        setAnimationDeltas(deltas);
+
+        // 清除之前的定时器
+        if (animationTimerRef.current) {
+            clearTimeout(animationTimerRef.current);
+        }
+
+        // 1秒后清除动画状态
+        animationTimerRef.current = setTimeout(() => {
+            setAnimationDeltas({
+                contrib: null,
+                credit: null,
+                maxHunt: null,
+                maxExpert: null,
+            });
+        }, 1000);
+
+        // 更新值
         setCurrContrib(prev => Math.min(LIMITS.CONTRIB, Number(prev) + task.contrib));
         setCurrCredit(prev => Math.min(LIMITS.CREDIT, Number(prev) + task.credit));
-        
+
         // 根据任务类型减少对应的限制计数
         if (task.id === 'hunt') {
             setMaxHunt(prev => Math.max(0, prev - 1));
@@ -83,6 +127,8 @@ export const useCalculator = () => {
     const resetCalc = () => {
         setCurrContrib('');
         setCurrCredit('');
+        setMaxHunt(5);
+        setMaxExpert(5);
     };
 
     const handleAdjust = (
@@ -102,6 +148,8 @@ export const useCalculator = () => {
         setMaxHunt,
         maxExpert,
         setMaxExpert,
+        // Animation
+        animationDeltas,
         // Computed
         benchmarks,
         dynamicPlan,
