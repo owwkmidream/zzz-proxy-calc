@@ -34,8 +34,14 @@ const calculateEfficiency = (
     const cProgress = targetC > 0 ? effectiveC / targetC : 0;
     const crProgress = targetCr > 0 ? effectiveCr / targetCr : 0;
 
-    // 综合效率 = 总进度贡献 / 时间
-    return (cProgress + crProgress) / task.time;
+    // 基础效率 = 总进度贡献 / 时间
+    const baseEfficiency = (cProgress + crProgress) / task.time;
+
+    // 加入微小的"单次收益加成"因子（万分之一量级）
+    // 当效率相近时，优先选择单次收益更高的任务，减少总任务次数
+    const singleRunBonus = (effectiveC + effectiveCr) * 0.0001;
+
+    return baseEfficiency + singleRunBonus;
 };
 
 /**
@@ -123,4 +129,24 @@ export const calculateDynamicPlan = (
     if (reqC === 0 && reqCr === 0) return null;
 
     return solveOptimalPlan(reqC, reqCr, maxHunt, maxExpert);
+};
+
+/**
+ * 计算如果只用单一任务完成目标，每种任务分别需要多少次
+ * 用于给玩家提供参考对比
+ */
+export const calculateSingleTaskCounts = (
+    reqC: number,
+    reqCr: number
+): Record<string, number> => {
+    const result: Record<string, number> = {};
+
+    for (const [_key, task] of Object.entries(TASKS)) {
+        // 需要多少次才能满足两个目标（取较大值）
+        const countForC = task.contrib > 0 ? Math.ceil(reqC / task.contrib) : Infinity;
+        const countForCr = task.credit > 0 ? Math.ceil(reqCr / task.credit) : Infinity;
+        result[task.id] = Math.max(countForC, countForCr);
+    }
+
+    return result;
 };

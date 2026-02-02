@@ -60,7 +60,7 @@ const App = () => {
 
           {/* 结果数据卡片 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
-            <PlanCard dynamicPlan={dynamicPlan} />
+            <PlanCard dynamicPlan={dynamicPlan} currContrib={Number(currContrib) || 0} currCredit={Number(currCredit) || 0} />
             <BenchmarkCard benchmarks={benchmarks} />
           </div>
 
