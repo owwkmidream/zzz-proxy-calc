@@ -47,80 +47,84 @@ export const ControlPanel = ({
             {/* 1. 进度与限制 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
                 {/* 贡献度输入 */}
-                <div className={`relative bg-black/40 p-1.5 rounded border flex items-center gap-2 group transition-all duration-300 overflow-hidden ${animationDeltas.contrib !== null
-                    ? 'border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
-                    : 'border-white/5 focus-within:border-purple-500/50'
-                    }`}>
-                    <div
-                        className="absolute left-0 top-0 bottom-0 bg-purple-500/20 transition-all duration-500 ease-out pointer-events-none"
-                        style={{ width: `${Math.min(100, (Number(currContrib || 0) / LIMITS.CONTRIB) * 100)}%` }}
-                    />
-                    <div className="relative h-8 w-8 rounded bg-purple-500/10 flex items-center justify-center shrink-0 cursor-help" title="贡献点数">
-                        <ContribIcon className="w-5 h-5 text-purple-500" />
+                <div className="relative group">
+                    <div className={`relative bg-black/40 p-1.5 rounded border flex items-center gap-2 transition-all duration-300 overflow-hidden ${animationDeltas.contrib !== null
+                        ? 'border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                        : 'border-white/5 focus-within:border-purple-500/50'
+                        }`}>
+                        <div
+                            className="absolute left-0 top-0 bottom-0 bg-purple-500/20 transition-all duration-500 ease-out pointer-events-none"
+                            style={{ width: `${Math.min(100, (Number(currContrib || 0) / LIMITS.CONTRIB) * 100)}%` }}
+                        />
+                        <div className="relative h-8 w-8 rounded bg-purple-500/10 flex items-center justify-center shrink-0 cursor-help" title="贡献点数">
+                            <ContribIcon className="w-5 h-5 text-purple-500" />
+                        </div>
+                        <input
+                            type="number"
+                            min={0}
+                            max={LIMITS.CONTRIB}
+                            value={currContrib}
+                            onChange={e => {
+                                const val = e.target.value;
+                                if (val === '') {
+                                    setCurrContrib('');
+                                    return;
+                                }
+                                const num = parseInt(val, 10);
+                                if (!isNaN(num)) {
+                                    setCurrContrib(Math.max(0, Math.min(num, LIMITS.CONTRIB)));
+                                }
+                            }}
+                            placeholder="0"
+                            className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                        />
+                        <span className="relative text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CONTRIB}</span>
                     </div>
-                    <input
-                        type="number"
-                        min={0}
-                        max={LIMITS.CONTRIB}
-                        value={currContrib}
-                        onChange={e => {
-                            const val = e.target.value;
-                            if (val === '') {
-                                setCurrContrib('');
-                                return;
-                            }
-                            const num = parseInt(val, 10);
-                            if (!isNaN(num)) {
-                                setCurrContrib(Math.max(0, Math.min(num, LIMITS.CONTRIB)));
-                            }
-                        }}
-                        placeholder="0"
-                        className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
-                    />
-                    <span className="relative text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CONTRIB}</span>
                     {/* 浮动变化值 */}
                     {animationDeltas.contrib !== null && (
-                        <span className="absolute -top-2 right-2 text-xs font-bold text-purple-400 animate-float-up pointer-events-none">
+                        <span key={animationDeltas.id} className="absolute -top-2 right-2 text-xs font-bold text-purple-400 animate-float-up pointer-events-none z-10">
                             +{animationDeltas.contrib}
                         </span>
                     )}
                 </div>
 
                 {/* 信用点输入 */}
-                <div className={`relative bg-black/40 p-1.5 rounded border flex items-center gap-2 group transition-all duration-300 overflow-hidden ${animationDeltas.credit !== null
-                    ? 'border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.4)]'
-                    : 'border-white/5 focus-within:border-teal-500/50'
-                    }`}>
-                    <div
-                        className="absolute left-0 top-0 bottom-0 bg-teal-500/20 transition-all duration-500 ease-out pointer-events-none"
-                        style={{ width: `${Math.min(100, (Number(currCredit || 0) / LIMITS.CREDIT) * 100)}%` }}
-                    />
-                    <div className="relative h-8 w-8 rounded bg-teal-500/10 flex items-center justify-center shrink-0 cursor-help" title="站点信度">
-                        <CreditIcon className="w-5 h-5 text-teal-500" />
+                <div className="relative group">
+                    <div className={`relative bg-black/40 p-1.5 rounded border flex items-center gap-2 transition-all duration-300 overflow-hidden ${animationDeltas.credit !== null
+                        ? 'border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.4)]'
+                        : 'border-white/5 focus-within:border-teal-500/50'
+                        }`}>
+                        <div
+                            className="absolute left-0 top-0 bottom-0 bg-teal-500/20 transition-all duration-500 ease-out pointer-events-none"
+                            style={{ width: `${Math.min(100, (Number(currCredit || 0) / LIMITS.CREDIT) * 100)}%` }}
+                        />
+                        <div className="relative h-8 w-8 rounded bg-teal-500/10 flex items-center justify-center shrink-0 cursor-help" title="站点信度">
+                            <CreditIcon className="w-5 h-5 text-teal-500" />
+                        </div>
+                        <input
+                            type="number"
+                            min={0}
+                            max={LIMITS.CREDIT}
+                            value={currCredit}
+                            onChange={e => {
+                                const val = e.target.value;
+                                if (val === '') {
+                                    setCurrCredit('');
+                                    return;
+                                }
+                                const num = parseInt(val, 10);
+                                if (!isNaN(num)) {
+                                    setCurrCredit(Math.max(0, Math.min(num, LIMITS.CREDIT)));
+                                }
+                            }}
+                            placeholder="0"
+                            className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
+                        />
+                        <span className="relative text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CREDIT}</span>
                     </div>
-                    <input
-                        type="number"
-                        min={0}
-                        max={LIMITS.CREDIT}
-                        value={currCredit}
-                        onChange={e => {
-                            const val = e.target.value;
-                            if (val === '') {
-                                setCurrCredit('');
-                                return;
-                            }
-                            const num = parseInt(val, 10);
-                            if (!isNaN(num)) {
-                                setCurrCredit(Math.max(0, Math.min(num, LIMITS.CREDIT)));
-                            }
-                        }}
-                        placeholder="0"
-                        className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
-                    />
-                    <span className="relative text-[10px] text-zinc-600 font-mono pr-2">/{LIMITS.CREDIT}</span>
                     {/* 浮动变化值 */}
                     {animationDeltas.credit !== null && (
-                        <span className="absolute -top-2 right-2 text-xs font-bold text-teal-400 animate-float-up pointer-events-none">
+                        <span key={animationDeltas.id} className="absolute -top-2 right-2 text-xs font-bold text-teal-400 animate-float-up pointer-events-none z-10">
                             +{animationDeltas.credit}
                         </span>
                     )}
@@ -172,7 +176,7 @@ export const ControlPanel = ({
                     </button>
                     {/* 浮动变化值 */}
                     {animationDeltas.maxHunt !== null && (
-                        <span className="absolute -top-2 right-2 text-xs font-bold text-orange-400 animate-float-up pointer-events-none">
+                        <span key={animationDeltas.id} className="absolute -top-2 right-2 text-xs font-bold text-orange-400 animate-float-up pointer-events-none">
                             {animationDeltas.maxHunt}
                         </span>
                     )}
@@ -224,7 +228,7 @@ export const ControlPanel = ({
                     </button>
                     {/* 浮动变化值 */}
                     {animationDeltas.maxExpert !== null && (
-                        <span className="absolute -top-2 right-2 text-xs font-bold text-blue-400 animate-float-up pointer-events-none">
+                        <span key={animationDeltas.id} className="absolute -top-2 right-2 text-xs font-bold text-blue-400 animate-float-up pointer-events-none">
                             {animationDeltas.maxExpert}
                         </span>
                     )}

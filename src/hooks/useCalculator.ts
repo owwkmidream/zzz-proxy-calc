@@ -3,13 +3,16 @@ import type { Task, PlanResult, Benchmarks } from '../types';
 import { LIMITS, TASKS } from '../constants';
 import { calculateDynamicPlan, generateBenchmarks, calculateSingleTaskCounts } from '../utils/solver';
 
-// 动画变化值的类型
+// 动画变化值状态
 export interface AnimationDeltas {
+    id: number;
     contrib: number | null;
     credit: number | null;
     maxHunt: number | null;
     maxExpert: number | null;
 }
+
+// ... (omitted lines are not part of the replacement, just context for me) but wait, I need to match the target content exactly.
 
 // LocalStorage keys
 const STORAGE_KEYS = {
@@ -47,6 +50,7 @@ export const useCalculator = () => {
 
     // 动画变化值状态
     const [animationDeltas, setAnimationDeltas] = useState<AnimationDeltas>({
+        id: 0,
         contrib: null,
         credit: null,
         maxHunt: null,
@@ -95,6 +99,7 @@ export const useCalculator = () => {
     const addReward = useCallback((task: Task) => {
         // 计算变动值
         const deltas: AnimationDeltas = {
+            id: Date.now(),
             contrib: task.contrib > 0 ? task.contrib : null,
             credit: task.credit > 0 ? task.credit : null,
             maxHunt: task.id === 'hunt' ? -1 : null,
@@ -112,6 +117,7 @@ export const useCalculator = () => {
         // 1秒后清除动画状态
         animationTimerRef.current = setTimeout(() => {
             setAnimationDeltas({
+                id: 0,
                 contrib: null,
                 credit: null,
                 maxHunt: null,
