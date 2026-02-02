@@ -54,8 +54,20 @@ export const ControlPanel = ({
                     </div>
                     <input
                         type="number"
+                        min={0}
+                        max={LIMITS.CONTRIB}
                         value={currContrib}
-                        onChange={e => setCurrContrib(e.target.value)}
+                        onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                                setCurrContrib('');
+                                return;
+                            }
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) {
+                                setCurrContrib(Math.max(0, Math.min(num, LIMITS.CONTRIB)));
+                            }
+                        }}
                         placeholder="0"
                         className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                     />
@@ -82,8 +94,20 @@ export const ControlPanel = ({
                     </div>
                     <input
                         type="number"
+                        min={0}
+                        max={LIMITS.CREDIT}
                         value={currCredit}
-                        onChange={e => setCurrCredit(e.target.value)}
+                        onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                                setCurrCredit('');
+                                return;
+                            }
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) {
+                                setCurrCredit(Math.max(0, Math.min(num, LIMITS.CREDIT)));
+                            }
+                        }}
                         placeholder="0"
                         className="relative no-spinner bg-transparent w-full text-sm font-mono text-white focus:outline-none placeholder-zinc-700"
                     />
@@ -105,20 +129,38 @@ export const ControlPanel = ({
                         <Sword className="w-4 h-4 text-orange-500" />
                     </div>
                     <button
-                        onClick={() => handleAdjust(setMaxHunt, -1)}
-                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95"
+                        onClick={() => {
+                            if (maxHunt > 0) handleAdjust(setMaxHunt, -1);
+                        }}
+                        disabled={maxHunt <= 0}
+                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         -
                     </button>
                     <input
                         type="number"
+                        min={0}
+                        max={99}
                         value={maxHunt}
-                        onChange={e => setMaxHunt(Number(e.target.value))}
+                        onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                                setMaxHunt(0);
+                                return;
+                            }
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) {
+                                setMaxHunt(Math.max(0, Math.min(num, 99)));
+                            }
+                        }}
                         className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                     />
                     <button
-                        onClick={() => handleAdjust(setMaxHunt, 1)}
-                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95"
+                        onClick={() => {
+                            if (maxHunt < 99) handleAdjust(setMaxHunt, 1);
+                        }}
+                        disabled={maxHunt >= 99}
+                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-orange-400 hover:bg-orange-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         +
                     </button>
@@ -139,20 +181,38 @@ export const ControlPanel = ({
                         <Trophy className="w-4 h-4 text-blue-500" />
                     </div>
                     <button
-                        onClick={() => handleAdjust(setMaxExpert, -1)}
-                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+                        onClick={() => {
+                            if (maxExpert > 0) handleAdjust(setMaxExpert, -1);
+                        }}
+                        disabled={maxExpert <= 0}
+                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         -
                     </button>
                     <input
                         type="number"
+                        min={0}
+                        max={99}
                         value={maxExpert}
-                        onChange={e => setMaxExpert(Number(e.target.value))}
+                        onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                                setMaxExpert(0);
+                                return;
+                            }
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) {
+                                setMaxExpert(Math.max(0, Math.min(num, 99)));
+                            }
+                        }}
                         className="no-spinner bg-transparent w-full text-center text-sm font-bold font-mono text-white focus:outline-none"
                     />
                     <button
-                        onClick={() => handleAdjust(setMaxExpert, 1)}
-                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+                        onClick={() => {
+                            if (maxExpert < 99) handleAdjust(setMaxExpert, 1);
+                        }}
+                        disabled={maxExpert >= 99}
+                        className="w-32 h-8 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         +
                     </button>
