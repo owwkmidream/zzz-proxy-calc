@@ -14,13 +14,14 @@ export const BenchmarkCard = ({ benchmarks }: BenchmarkCardProps) => {
             </div>
 
             <div className="grid grid-cols-1 gap-2 mt-1">
+
                 {/* 高效率 */}
                 <div className="flex items-center justify-between p-2 rounded bg-emerald-500/5 border border-emerald-500/10">
                     <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span className="text-xs font-bold text-emerald-100">高效率</span>
                         <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-mono ml-1">
-                            (5 <Sword className="w-3 h-3 text-orange-500" /> + {benchmarks.best.counts.hollow} <Ghost className="w-3 h-3 text-purple-500" />)
+                            ({benchmarks.best.counts.hunt} <Sword className="w-3 h-3 text-orange-500" /> + {benchmarks.best.counts.hollow} <Ghost className="w-3 h-3 text-purple-500" />)
                         </div>
                     </div>
                     <span className="text-sm font-black text-emerald-400 font-mono">
@@ -34,9 +35,10 @@ export const BenchmarkCard = ({ benchmarks }: BenchmarkCardProps) => {
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         <span className="text-xs font-bold text-blue-100">均衡型</span>
                         <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-mono ml-1">
-                            (5 <Trophy className="w-3 h-3 text-blue-500" /> + {benchmarks.mod.counts.hollow} <Ghost className="w-3 h-3 text-purple-500" />)
+                            ({benchmarks.mod.counts.expert} <Trophy className="w-3 h-3 text-blue-500" /> + {benchmarks.mod.counts.hollow} <Ghost className="w-3 h-3 text-purple-500" />)
                         </div>
                     </div>
+
                     <span className="text-sm font-black text-blue-400 font-mono">
                         {Math.ceil(benchmarks.mod.totalTime / 60)} <span className="text-[10px] text-zinc-600">MIN</span>
                     </span>
