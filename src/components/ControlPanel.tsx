@@ -49,7 +49,7 @@ export const ControlPanel = ({
                         className="absolute left-0 top-0 bottom-0 bg-purple-500/20 transition-all duration-500 ease-out pointer-events-none"
                         style={{ width: `${Math.min(100, (Number(currContrib || 0) / LIMITS.CONTRIB) * 100)}%` }}
                     />
-                    <div className="relative h-8 w-8 rounded bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <div className="relative h-8 w-8 rounded bg-purple-500/10 flex items-center justify-center shrink-0 cursor-help" title="贡献点数">
                         <ContribIcon className="w-5 h-5 text-purple-500" />
                     </div>
                     <input
@@ -77,7 +77,7 @@ export const ControlPanel = ({
                         className="absolute left-0 top-0 bottom-0 bg-teal-500/20 transition-all duration-500 ease-out pointer-events-none"
                         style={{ width: `${Math.min(100, (Number(currCredit || 0) / LIMITS.CREDIT) * 100)}%` }}
                     />
-                    <div className="relative h-8 w-8 rounded bg-teal-500/10 flex items-center justify-center shrink-0">
+                    <div className="relative h-8 w-8 rounded bg-teal-500/10 flex items-center justify-center shrink-0 cursor-help" title="站点信度">
                         <CreditIcon className="w-5 h-5 text-teal-500" />
                     </div>
                     <input
